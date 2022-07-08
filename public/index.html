@@ -22,13 +22,16 @@
 			</div>
 		</form>
 		<div class="row">
-			<ul class="list-group" id="chatContentWrapper">
+			<ul class="list-group mb-2" id="chatContentWrapper">
 			</ul>
 		</div>
 	</div>
 
 	<template id="chatContentTemplate">
-		<li class="list-group-item"></li>
+		<li class="list-group-item d-flex">
+			<div class="p-2 flex-fill" id="chatContentText"></div>
+			<div class="p-2 text-nowrap text-muted" id="chatContentTime"></div>
+		</li>
 	</template>
 
 	<script src="js/bootstrap.min.js"></script>
@@ -40,21 +43,33 @@
 		const contentChat = document.querySelector("#chatContentWrapper");
 		const contentTemplate = document.querySelector("#chatContentTemplate");
 
+		let count = 0;
+
 		buttonSend.addEventListener("click", (e) => {
-			submitChat();
+			if(textChat.value.trim() != ""){
+				submitChat();
+			}
 		});
 
 		textChat.addEventListener("keypress", (e) => {
 			if(e.key == "Enter" && !e.shiftKey){
 				e.preventDefault();
-				submitChat();
+				if(textChat.value.trim() != ""){
+					submitChat();
+				}
 			}
 		});
 
-		socket.addEventListener("messageFromServer", (message) => {
+		socket.addEventListener("messageFromServer", (data) => {
 			const messageElement = contentTemplate.content.firstElementChild.cloneNode(true);
-			messageElement.innerHTML = message;
+			if(count % 2 == 1){
+				messageElement.classList.add("list-group-item-secondary");
+			}
+			console.log(data);
+			messageElement.querySelector("#chatContentText").appendChild(document.createTextNode(data.message));
+			messageElement.querySelector("#chatContentTime").appendChild(document.createTextNode(data.timestamp));
 			contentChat.prepend(messageElement);
+			count++;
 		});
 
 		const submitChat = () => {
