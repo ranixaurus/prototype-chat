@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Prototype Chat</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css" />
+	<link rel="icon" href="images/favicon.ico" />
+</head>
+<body>
+	<div class="container">
+		<header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+			<span class="fs-4">Chatting System Prototype</span>
+		</header>
+		<form class="py-3 mb-4 border-bottom" action="#" method="post">
+			<div class="mb-3">
+				<textarea class="form-control" id="textChat" rows="10" placeholder="type something here..."></textarea>
+			</div>
+			<div class="mb-3">
+				<button type="button" class="btn btn-primary" id="buttonSend">Send</button>
+			</div>
+		</form>
+		<div class="row">
+			<ul class="list-group" id="chatContentWrapper">
+			</ul>
+		</div>
+	</div>
+
+	<template id="chatContentTemplate">
+		<li class="list-group-item"></li>
+	</template>
+
+	<script src="js/bootstrap.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+		const socket = io();
+		const buttonSend = document.querySelector("#buttonSend");
+		const textChat = document.querySelector("#textChat");
+		const contentChat = document.querySelector("#chatContentWrapper");
+		const contentTemplate = document.querySelector("#chatContentTemplate");
+
+		buttonSend.addEventListener("click", (e) => {
+			submitChat();
+		});
+
+		textChat.addEventListener("keypress", (e) => {
+			if(e.key == "Enter" && !e.shiftKey){
+				e.preventDefault();
+				submitChat();
+			}
+		});
+
+		socket.addEventListener("messageFromServer", (message) => {
+			const messageElement = contentTemplate.content.firstElementChild.cloneNode(true);
+			messageElement.innerHTML = message;
+			contentChat.prepend(messageElement);
+		});
+
+		const submitChat = () => {
+			const text = textChat.value;
+			socket.emit("messageFromClient", text);
+			textChat.value = "";
+		};
+	</script>
+</body>
+</html>
